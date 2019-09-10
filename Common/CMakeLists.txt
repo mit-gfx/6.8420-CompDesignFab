@@ -1,0 +1,7 @@
+set(COMMON_HEADER
+  "${CMAKE_CURRENT_LIST_DIR}/Geometry/"
+  "${CMAKE_CURRENT_LIST_DIR}/Mesh/"
+)
+
+include_directories(${COMMON_HEADER})
+
