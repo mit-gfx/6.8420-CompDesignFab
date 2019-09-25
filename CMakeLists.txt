@@ -40,6 +40,9 @@ get_directory_property(COMMON_HEADER
 # Include each assignment
 if (NOT ${HW} OR ${HW} EQUAL "all")
     add_subdirectory(assignment1)
+    add_subdirectory(assignment2)
 elseif (${HW} EQUAL "1")
     add_subdirectory(assignment1)
+elseif (${HW} EQUAL "2")
+    add_subdirectory(assignment2)
 endif()

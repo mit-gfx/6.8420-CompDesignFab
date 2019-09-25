@@ -63,6 +63,16 @@ namespace geometry {
             return intersections;
         }
 
+        // TODO: HW2
+        // part 1.1
+        // Implement the function to do intersection between triangle and a ray
+        // Input: a ray, the ray is represented by an origin position and a direction vector
+        // Output: return a real number t, the intersection is origin + dir * t, t = -1 means no intersection
+        const T IntersectRay(const Vector3<T>& origin, const Vector3<T>& dir) const {
+            const T flag = static_cast<T>(-1.0);    
+            return flag;
+        }
+
     private:
         Vector3<T> _vertices[3];
     };
