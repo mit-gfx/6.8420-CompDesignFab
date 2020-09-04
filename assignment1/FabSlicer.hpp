@@ -230,7 +230,7 @@ namespace fab_translation {
                     Vector3<T> t_pos = intersection_edges[i][j].p1();
                     int num_steps = (int)((t_pos - s_pos).norm() / point_density) + 1;
                     for (int step = 0;step <= num_steps;++step) {
-                        Vector3<T> pos = s_pos * ((T)step / num_steps) + t_pos * ((T)1.0 - (T)step / num_steps);
+                        Vector3<T> pos = t_pos * ((T)step / num_steps) + s_pos * ((T)1.0 - (T)step / num_steps);
                         points.push_back(pos);
                     }
                 }
@@ -256,31 +256,40 @@ namespace fab_translation {
             T point_density, 
             std::vector<std::vector<std::vector<Vector3<T>>>>& contour) {
             // generate point cloud for ply
-            std::vector<Vector3<T>> points;
+            std::vector<std::vector<Vector3<T>>> points;
+            int num_points = 0;
             points.clear();
             for (int i = 0;i < contour.size();++i)
-                for (int j = 0;j < contour[i].size();++j) 
+                for (int j = 0;j < contour[i].size();++j) {
+                    std::vector<Vector3<T>> one_contour;
                     for (int k = 0;k < contour[i][j].size();++k) {
                         Vector3<T> s_pos = contour[i][j][k];
                         Vector3<T> t_pos = contour[i][j][(k + 1) % contour[i][j].size()];
                         int num_steps = (int)((t_pos - s_pos).norm() / point_density) + 1;
-                        for (int step = 0;step <= num_steps;++step) {
-                            Vector3<T> pos = s_pos * ((T)step / num_steps) + t_pos * ((T)1.0 - (T)step / num_steps);
-                            points.push_back(pos);
+                        for (int step = 0;step < num_steps;++step) {
+                            Vector3<T> pos = t_pos * ((T)step / num_steps) + s_pos * ((T)1.0 - (T)step / num_steps);
+                            one_contour.push_back(pos);
+                            ++ num_points;
                         }
                     }
+                    points.push_back(one_contour);
+                }
 
             // output to ply
             FILE* fp = fopen(file_name.c_str(), "w");
             fprintf(fp, "ply\nformat ascii 1.0\n");
-            fprintf(fp, "element vertex %d\n", (int)points.size());
+            fprintf(fp, "element vertex %d\n", num_points);
             fprintf(fp, "property float32 x\nproperty float32 y\nproperty float32 z\n");
             fprintf(fp, "end_header\n");
-            for (int i = 0;i < points.size();++i)
-                if (std::is_same<T, float>::value)
-                    fprintf(fp, "%.6f %.6f %.6f\n", points[i](0), points[i](1), points[i](2));
-                else
-                    fprintf(fp, "%.6lf %.6lf %.6lf\n", points[i](0), points[i](1), points[i](2));
+            for (int i = 0;i < points.size();++i) {
+                for (int j = 0;j < points[i].size();++j) {
+                    if (std::is_same<T, float>::value)
+                        fprintf(fp, "%.6f %.6f %.6f\n", points[i][j](0), points[i][j](1), points[i][j](2));
+                    else
+                        fprintf(fp, "%.6lf %.6lf %.6lf\n", points[i][j](0), points[i][j](1), points[i][j](2));
+                }
+                fprintf(fp, "\n");
+            }
             fclose(fp);
         }
 
