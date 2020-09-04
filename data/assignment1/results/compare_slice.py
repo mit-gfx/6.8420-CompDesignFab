@@ -16,18 +16,29 @@ def getArgs(args=sys.argv[1:]):
 options = getArgs(sys.argv[1:])
 
 # load points
-with open(options.input, 'rb') as f:
-    input_ply = PlyData.read(f)
-    input_points = np.asarray([list(ele) for ele in input_ply['vertex'].data])
-    input_points_order = np.lexsort((input_points[:,0],input_points[:,1],input_points[:,2]))
+def ReadPly(path):
+    with open(path, 'r') as f:
+        lines = f.readlines()
+        new_contour_flag = True
+        # get number of points
+        num_points = int(lines[2][15:])
+        points = []
+        for i in range(7,len(lines)):
+            if lines[i] == "\n":                
+                pass
+            else:    
+                points.append([float(val) for val in lines[i].split()])
+        # reorder contours
+        points = np.asarray(points)
+        points_order = np.lexsort((points[:,0],points[:,1],points[:,2]))
+    return points, points_order, num_points
 
-with open(options.reference, 'rb') as f:
-    ref_ply = PlyData.read(f)
-    ref_points = np.asarray([list(ele) for ele in ref_ply['vertex'].data])
-    ref_points_order = np.lexsort((ref_points[:,0],ref_points[:,1],ref_points[:,2]))
+input_points, input_points_order, input_num_points = ReadPly(options.input)
+ref_points, ref_points_order, ref_num_points = ReadPly(options.reference)
+
 
 # first judge if the number of points matches
-if len(input_points_order) != len(ref_points_order):
+if input_num_points != ref_num_points:
     print("Not equal")
 else:
     for i in range(len(input_points_order)):
@@ -35,5 +46,3 @@ else:
             print("Not equal")
             quit()
     print("Equal")
-    
-
