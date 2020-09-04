@@ -139,11 +139,15 @@ namespace fab_translation {
             double contour_time = std::chrono::duration_cast<std::chrono::duration<double>>(t_end - t_start).count();
             printf("stitching edges finished in %.6lf seconds\n", contour_time);
 
+            VisualizeContour(std::string(PROJECT_SOURCE_DIR) + "/data/assignment1/results/contour.ply", 0.5, contour);
+
             t_start = std::chrono::high_resolution_clock::now();
             Infill(contour, infill_edges);
             t_end = std::chrono::high_resolution_clock::now();
             double infill_time = std::chrono::duration_cast<std::chrono::duration<double>>(t_end - t_start).count();
             printf("infilling finished in %.6lf seconds\n", infill_time);
+
+            VisualizeInfill(std::string(PROJECT_SOURCE_DIR) + "/data/assignment1/results/infill.ply", 0.5, infill_edges);
         }
 
         // TODO: HW1
