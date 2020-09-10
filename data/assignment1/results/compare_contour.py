@@ -59,7 +59,14 @@ else:
             print("Not equal")
             quit()
         for j in range(input_contours[i].shape[0]):
-            if (np.linalg.norm(input_contours[i][j] - ref_contours[i][j], 1) > options.threshold):
-                print("Not equal")
-                quit()
+            if j == 0:
+                if (np.linalg.norm(input_contours[i][j] - ref_contours[i][j], 1) > options.threshold):
+                    print("Not equal")
+                    quit()
+            else:
+                # compare both clockwise and counter-clockwise
+                if (np.linalg.norm(input_contours[i][j] - ref_contours[i][j], 1) > options.threshold) and \
+                   (np.linalg.norm(input_contours[i][j] - ref_contours[i][input_contours[i].shape[0] - j], 1) > options.threshold):
+                    print("Not equal")
+                    quit()
     print("Equal")
