@@ -158,6 +158,8 @@ namespace fab_translation {
         //      intersection_edges: soup of intersection edges for each layer
         // Hints:
         //      - enumerate each plane
+        //          * slicing goes bottom-up in the Z direction
+        //          * use predefined variables in this class to calculate the slicing planes
         //      - intersect it with every triangle, get an edge from each triangle (or not intersect at all)
         //      - collect all intersection edges and return
         void Slicing_bruteforce(mesh::TriMesh<T>& tri_mesh, 

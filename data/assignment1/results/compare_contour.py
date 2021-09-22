@@ -40,6 +40,10 @@ def ReadPly(path):
                     contour = []
                     new_contour_flag = False
                 contour.append([float(val) for val in lines[i].split()])
+        # check input validity
+        if not contours:
+            print("Error - file '%s' is empty" % path)
+            quit()
         contours_start_points = np.asarray(contours_start_points)
         # reorder contours
         contours_start_points_order = np.lexsort((contours_start_points[:,0],contours_start_points[:,1],contours_start_points[:,2]))

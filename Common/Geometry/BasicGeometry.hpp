@@ -52,7 +52,7 @@ namespace geometry {
         // part 2.1
         // Implement the function to do intersection between triangle and plane p
         // Input: plane p
-        // Output: return pairs for intersections with three edges
+        // Output: intersections points with three edges
         // Hint:
         //      - enumerate three edges of the triangle and do intersection individually
         //      - consider the case that no intersection

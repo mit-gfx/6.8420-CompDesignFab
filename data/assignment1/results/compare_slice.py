@@ -28,8 +28,15 @@ def ReadPly(path):
                 pass
             else:    
                 points.append([float(val) for val in lines[i].split()])
+        # check input validity
+        if not points:
+            print("Error - file '%s' is empty" % path)
+            quit()
         # reorder contours
         points = np.asarray(points)
+        if points.ndim != 2 or points.shape[1] != 3:
+            print("Error - file '%s' has invalid content" % path)
+            quit()
         points_order = np.lexsort((points[:,0],points[:,1],points[:,2]))
     return points, points_order, num_points
 
