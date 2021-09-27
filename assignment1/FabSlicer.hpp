@@ -188,11 +188,15 @@ namespace fab_translation {
                         // generate 1 edge and push
                         IntersectionEdge<T> e1 (intersection_points[0], intersection_points[1]);
                         intersection_edges_in_layer.push_back(e1);
-                    } else if (intersection_points.size() == 1) {
+                    } 
+                    /* 
+                    // removed to match the slicing result to expected
+                    else if (intersection_points.size() == 1) {
                         // generate 1 edge and push
                         IntersectionEdge<T> e1 (intersection_points[0], intersection_points[0]);
                         intersection_edges_in_layer.push_back(e1);
                     }
+                    */
                 }
 
                 intersection_edges.push_back(intersection_edges_in_layer);
