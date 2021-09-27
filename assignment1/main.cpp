@@ -26,9 +26,9 @@ int main(int argc, char** argv) {
 	std::cerr << "Welcome to Computational Fabrication Class" << std::endl;
 
 	bool do_bruteforce = true;
-	std::string model_file = std::string(PROJECT_SOURCE_DIR) + "/data/assignment1/bunny.stl";
-	std::string gcode_file_brute_force = std::string(PROJECT_SOURCE_DIR) + "/data/assignment1/results/bunny_brute_force.gcode";
-	std::string gcode_file = std::string(PROJECT_SOURCE_DIR) + "/data/assignment1/results/bunny.gcode";
+	std::string model_file = std::string(PROJECT_SOURCE_DIR) + "/data/assignment1/triangle.stl";
+	std::string gcode_file_brute_force = std::string(PROJECT_SOURCE_DIR) + "/data/assignment1/results/triangle_brute_force.gcode";
+	std::string gcode_file = std::string(PROJECT_SOURCE_DIR) + "/data/assignment1/results/triangle.gcode";
 
 	if (argc > 1) {
 		if (argv[2][0] == '1')
@@ -57,8 +57,8 @@ int main(int argc, char** argv) {
     //             (you should also modify the constructor to initialize your tree)
     //     If contour creation is a bottleneck, accellerate it as well.
 
-    std::cout << "Slicing accelerated" << std::endl;
-	slice_to_gcode(model_file, gcode_file);
+    // std::cout << "Slicing accelerated" << std::endl;
+	// slice_to_gcode(model_file, gcode_file);
 
     return 0;
 }
