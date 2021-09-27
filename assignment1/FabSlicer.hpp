@@ -164,7 +164,45 @@ namespace fab_translation {
         //      - collect all intersection edges and return
         void Slicing_bruteforce(mesh::TriMesh<T>& tri_mesh, 
             std::vector<std::vector<IntersectionEdge<T>>> &intersection_edges) {
-            
+            // enumerate xy planes using point (0, 0, z) and normal vector (0, 0, 1)
+            for (T z = _bottom ; z <= _top ; z += _dz) {
+                Vector3<T> p, normal;
+                p << 0, 0, z;
+                normal << 0, 0, 1;
+                Plane plane (p, normal);
+                std::vector<IntersectionEdge<T>> intersection_edges_in_layer;
+
+                for (int n_el = 0 ; n_el < tri_mesh.elements().size() ; n_el++) {
+                    Eigen::Vector3i index = tri_mesh.elements(n_el); 
+                    Triangle triangle (tri_mesh.vertices(index[0]), tri_mesh.vertices(index[1]), tri_mesh.vertices(index[2]));
+                    std::vector<Vector3<T>> intersection_points = triangle.IntersectPlane(plane);
+                    switch (intersection_points.size()) {
+                        case 3:
+                            // generate 3 edges and push
+                            IntersectionEdge e1 (intersection_points[0], intersection_points[1]);
+                            IntersectionEdge e2 (intersection_points[1], intersection_points[2]);
+                            IntersectionEdge e3 (intersection_points[2], intersection_points[0]);
+                            intersection_edges_in_layer.push_back(e1);
+                            intersection_edges_in_layer.push_back(e2);
+                            intersection_edges_in_layer.push_back(e3);
+                            break;
+
+                        case 2:
+                            // generate 1 edge and push
+                            IntersectionEdge e1 (intersection_points[0], intersection_points[1]);
+                            intersection_edges_in_layer.push_back(e1);
+                            break;
+
+                        case 1:
+                            // generate 1 edge and push
+                            IntersectionEdge e1 (intersection_points[0], intersection_points[0]);
+                            intersection_edges_in_layer.push_back(e1);
+                            break;
+                    }
+                }
+                
+                intersection_edges.push_back(intersection_edges_in_layer);
+            }
         }
 
         // TODO: HW1
