@@ -95,7 +95,7 @@ namespace geometry {
                     }
 
                     if (d1 * d2 < 0) {
-                        Vector3<T> intersectionPoint = v1 + (v2 - v1) * d1 / (d1 + d2);
+                        Vector3<T> intersectionPoint = v1 + (v2 - v1) * d1 / (d1 - d2);
                         intersections.push_back(intersectionPoint);
                     }
                 }
