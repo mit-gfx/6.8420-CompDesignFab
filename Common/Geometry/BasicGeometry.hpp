@@ -60,6 +60,86 @@ namespace geometry {
         std::vector<Vector3<T>> IntersectPlane(Plane<T> p) {
             std::vector<Vector3<T>> intersections;
             intersections.clear();
+
+            // identify how many points are on the plane and the sign of the signed distance
+            // if 3 points are on the plane, the entire triangle is on the plane
+            // in this case, return all 3 points
+            // if 2 points are on the plane, one side of the triangle is on the plane
+            // in this case, return the 2 points that are on the plane
+            // if 1 point is on the plane, return that point and (potentially) the intersection on the other edge
+            // for each edge, there will be an intersection if and only if the signed distance of each vertex from the plane has different signs
+            // if the signs are different, use proportion to determine the intersection point
+            // in particular, if vertex1 has dist d1 and vertex2 has dist d2 from the plane where d1 * d2 < 0
+            // then the intersection point is v1 + (v2 - v1) * d1 / (d1 + d2)
+
+            T dist[3];
+            bool isOnPlane[3];
+            int onPlaneCounter = 0;
+            for (int i = 0 ; i < 3 ; i++) {
+                isOnPlane[i] = p.onPlane(_vertices[i], dist[i]);
+                if (isOnPlane[i]) {
+                    onPlaneCounter++;
+                }
+            }
+            
+            switch (onPlaneCounter) {
+                case 0:
+                    for (int i = 0 ; i < 3 ; i++) {
+                        Vector3<T> v1 = _vertices[i], v2;
+                        T d1 = dist[i], d2;
+                        if (i == 2) {
+                            v2 = _vertices[0];
+                            d2 = dist[0];
+                        } else {
+                            v2 = _vertices[i+1];
+                            d2 = dist[i+1];
+                        }
+
+                        if (d1 * d2 < 0) {
+                            Vector3<T> intersectionPoint = v1 + (v2 - v1) * d1 / (d1 + d2);
+                            intersections.push_back(intersectionPoint);
+                        }
+                    }
+                    break;
+
+                case 1:
+                    Vector3<T> v1, v2;
+                    T d1, d2;
+                    if (isOnPlane[0]) {
+                        intersections.push_back(_vertices[0]);
+                        v1 = _vertices[1];
+                        v2 = _vertices[2];
+                        d1 = dist[1];
+                        d2 = dist[2];
+                    } else if (isOnPlane[1]) {
+                        intersections.push_back(_vertices[1]);
+                        v1 = _vertices[0];
+                        v2 = _vertices[2];
+                        d1 = dist[0];
+                        d2 = dist[2];
+                    } else {
+                        intersections.push_back(_vertices[2]);
+                        v1 = _vertices[1];
+                        v2 = _vertices[0];
+                        d1 = dist[1];
+                        d2 = dist[0];
+                    }
+
+                    if (d1 * d2 < 0) {
+                        Vector3<T> intersectionPoint = v1 + (v2 - v1) * d1 / (d1 + d2);
+                        intersections.push_back(intersectionPoint);
+                    }
+                    break;
+
+                case 2:
+                case 3:
+                    for (int i = 0 ; i < 3 ; i++) {
+                        if (isOnPlane[i]) {
+                            intersections.push_back(_vertices[i]);
+                        }
+                    }
+                    break;
+            }
             return intersections;
         }
 
