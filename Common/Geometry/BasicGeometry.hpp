@@ -81,64 +81,52 @@ namespace geometry {
                     onPlaneCounter++;
                 }
             }
-            
-            switch (onPlaneCounter) {
-                case 0:
-                    for (int i = 0 ; i < 3 ; i++) {
-                        Vector3<T> v1 = _vertices[i], v2;
-                        T d1 = dist[i], d2;
-                        if (i == 2) {
-                            v2 = _vertices[0];
-                            d2 = dist[0];
-                        } else {
-                            v2 = _vertices[i+1];
-                            d2 = dist[i+1];
-                        }
 
-                        if (d1 * d2 < 0) {
-                            Vector3<T> intersectionPoint = v1 + (v2 - v1) * d1 / (d1 + d2);
-                            intersections.push_back(intersectionPoint);
-                        }
-                    }
-                    break;
-
-                case 1:
-                    Vector3<T> v1, v2;
-                    T d1, d2;
-                    if (isOnPlane[0]) {
-                        intersections.push_back(_vertices[0]);
-                        v1 = _vertices[1];
-                        v2 = _vertices[2];
-                        d1 = dist[1];
-                        d2 = dist[2];
-                    } else if (isOnPlane[1]) {
-                        intersections.push_back(_vertices[1]);
-                        v1 = _vertices[0];
-                        v2 = _vertices[2];
-                        d1 = dist[0];
-                        d2 = dist[2];
-                    } else {
-                        intersections.push_back(_vertices[2]);
-                        v1 = _vertices[1];
+            if (onPlaneCounter == 0) {
+                for (int i = 0 ; i < 3 ; i++) {
+                    Vector3<T> v1 = _vertices[i], v2;
+                    T d1 = dist[i], d2;
+                    if (i == 2) {
                         v2 = _vertices[0];
-                        d1 = dist[1];
                         d2 = dist[0];
+                    } else {
+                        v2 = _vertices[i+1];
+                        d2 = dist[i+1];
                     }
 
                     if (d1 * d2 < 0) {
                         Vector3<T> intersectionPoint = v1 + (v2 - v1) * d1 / (d1 + d2);
                         intersections.push_back(intersectionPoint);
                     }
-                    break;
-
-                case 2:
-                case 3:
-                    for (int i = 0 ; i < 3 ; i++) {
-                        if (isOnPlane[i]) {
-                            intersections.push_back(_vertices[i]);
-                        }
+                }
+            } else if (onPlaneCounter == 1) {
+                Vector3<T> v1, v2;
+                T d1, d2;
+                if (isOnPlane[0]) {
+                    intersections.push_back(_vertices[0]);
+                    v1 = _vertices[1];
+                    v2 = _vertices[2];
+                    d1 = dist[1];
+                    d2 = dist[2];
+                } else if (isOnPlane[1]) {
+                    intersections.push_back(_vertices[1]);
+                    v1 = _vertices[0];
+                    v2 = _vertices[2];
+                    d1 = dist[0];
+                    d2 = dist[2];
+                } else {
+                    intersections.push_back(_vertices[2]);
+                    v1 = _vertices[1];
+                    v2 = _vertices[0];
+                    d1 = dist[1];
+                    d2 = dist[0];
+                }
+            } else if (onPlaneCounter == 2 || onPlaneCounter == 3) {
+                for (int i = 0 ; i < 3 ; i++) {
+                    if (isOnPlane[i]) {
+                        intersections.push_back(_vertices[i]);
                     }
-                    break;
+                }
             }
             return intersections;
         }
