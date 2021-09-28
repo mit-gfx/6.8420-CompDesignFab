@@ -233,7 +233,43 @@ namespace fab_translation {
         void CreateContour(mesh::TriMesh<T>& tri_mesh,
             std::vector<std::vector<IntersectionEdge<T>>> &intersection_edges,
             std::vector<std::vector<std::vector<Vector3<T>>>>& contours) {
+            for (int layer = 0 ; layer < intersection_edges.size() ; layer++) {
+                std::vector<std::vector<Vector3<T>>> contours_in_layer;
+                std::vector<IntersectionEdge<T>> intersection_edges_in_layer = intersection_edges[layer];
+                while (intersection_edges_in_layer.size() != 0) {
+                    Vector3<T> current_point = intersection_edges_in_layer[0].p1();
+                    Vector3<T> start_point = intersection_edges_in_layer[0].p1();
+                    std::vector<Vector3<T>> contour;
+                    contour.push_back(intersection_edges_in_layer[0].p0());
+                    intersection_edges_in_layer.erase(intersection_edges_in_layer.begin());
+                    bool next_edge_found = true;
+                    while (next_edge_found) {
+                        next_edge_found = false;
+                        for (int i = 0 ; i < intersection_edges_in_layer.size() ; i++) {
+                            if (mesh::Vertex_Cmp(current_point, intersection_edges_in_layer[i].p0())) {
+                                contour.push_back(current_point);
+                                current_point = intersection_edges_in_layer[i].p1();
+                                intersection_edges_in_layer.erase(intersection_edges_in_layer.begin() + i);
+                                next_edge_found = true;
+                                break;
+                            }
 
+                            if (mesh::Vertex_Cmp(current_point, intersection_edges_in_layer[i].p1())) {
+                                contour.push_back(current_point);
+                                current_point = intersection_edges_in_layer[i].p0();
+                                intersection_edges_in_layer.erase(intersection_edges_in_layer.begin() + i);
+                                next_edge_found = true;
+                                break;
+                            }                        
+                        }
+                    }
+
+                    if (mesh::Vertex_Cmp(current_point, start_point) && contour.size() > 1) {
+                        contours_in_layer.push_back(contour);
+                    }
+                }
+                contours.push_back(contours_in_layer);
+            }
         }
 
         // TODO: HW1 (Optional)

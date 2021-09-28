@@ -26,9 +26,9 @@ int main(int argc, char** argv) {
 	std::cerr << "Welcome to Computational Fabrication Class" << std::endl;
 
 	bool do_bruteforce = true;
-	std::string model_file = std::string(PROJECT_SOURCE_DIR) + "/data/assignment1/triangle.stl";
-	std::string gcode_file_brute_force = std::string(PROJECT_SOURCE_DIR) + "/data/assignment1/results/triangle_brute_force.gcode";
-	std::string gcode_file = std::string(PROJECT_SOURCE_DIR) + "/data/assignment1/results/triangle.gcode";
+	std::string model_file = std::string(PROJECT_SOURCE_DIR) + "/data/assignment1/bunny.stl";
+	std::string gcode_file_brute_force = std::string(PROJECT_SOURCE_DIR) + "/data/assignment1/results/bunny_brute_force.gcode";
+	std::string gcode_file = std::string(PROJECT_SOURCE_DIR) + "/data/assignment1/results/bunny.gcode";
 
 	if (argc > 1) {
 		if (argv[2][0] == '1')

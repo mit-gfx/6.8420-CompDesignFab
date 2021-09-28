@@ -1,0 +1,7 @@
+ply
+format ascii 1.0
+element vertex 0
+property float32 x
+property float32 y
+property float32 z
+end_header

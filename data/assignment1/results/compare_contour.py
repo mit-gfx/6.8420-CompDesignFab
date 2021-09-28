@@ -56,21 +56,21 @@ ref_contours, ref_contours_start_points, ref_num_points = ReadPly(options.refere
 
 # compare contours
 if input_num_points != ref_num_points or input_contours_start_points.shape[0] != ref_contours_start_points.shape[0]:
-    print('Not equal')
+    print('Not equal #0')
 else:
     for i in range(len(input_contours)):
         if input_contours[i].shape[0] != ref_contours[i].shape[0]:
-            print("Not equal")
+            print("Not equal #1")
             quit()
         for j in range(input_contours[i].shape[0]):
             if j == 0:
                 if (np.linalg.norm(input_contours[i][j] - ref_contours[i][j], 1) > options.threshold):
-                    print("Not equal")
+                    print("Not equal #2")
                     quit()
             else:
                 # compare both clockwise and counter-clockwise
                 if (np.linalg.norm(input_contours[i][j] - ref_contours[i][j], 1) > options.threshold) and \
                    (np.linalg.norm(input_contours[i][j] - ref_contours[i][input_contours[i].shape[0] - j], 1) > options.threshold):
-                    print("Not equal")
+                    print("Not equal #3")
                     quit()
     print("Equal")
