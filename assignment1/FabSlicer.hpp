@@ -238,7 +238,7 @@ namespace fab_translation {
                 std::vector<IntersectionEdge<T>> intersection_edges_in_layer = intersection_edges[layer];
                 while (intersection_edges_in_layer.size() != 0) {
                     Vector3<T> current_point = intersection_edges_in_layer[0].p1();
-                    Vector3<T> start_point = intersection_edges_in_layer[0].p1();
+                    Vector3<T> start_point = intersection_edges_in_layer[0].p0();
                     std::vector<Vector3<T>> contour;
                     contour.push_back(intersection_edges_in_layer[0].p0());
                     intersection_edges_in_layer.erase(intersection_edges_in_layer.begin());
