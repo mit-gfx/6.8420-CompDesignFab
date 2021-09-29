@@ -1,4 +1,5 @@
 import os
+import numpy as np
 
 testcases = ['bunny', 'fandisk', 'dragon', 'spot', \
              'bunny_fast', 'fandisk_fast', 'dragon_fast', 'spot_fast',\
@@ -25,15 +26,15 @@ for testcase in testcases:
         print("{:15s}: output dimensions mismatch".format(testcase))
         continue
 
+    total = 0
     mismatch = 0
     for i in range((nx_std + 1) * (ny_std + 1)):
-        s_res = fp_res.readline()
-        s_std = fp_std.readline()
-        for j in range(nz_std + 1):
-            if s_res[j] != s_std[j]:
-                mismatch += 1
+        s_res = np.array([int(c) for c in fp_res.readline().strip()])
+        s_std = np.array([int(c) for c in fp_std.readline().strip()])
+        total += (s_res | s_std).sum()
+        mismatch += (s_res != s_std).sum()
     
-    total = (nx_std + 1) * (ny_std + 1) * (nz_std + 1)
+    # total = (nx_std + 1) * (ny_std + 1) * (nz_std + 1)
     similarity = float(total - mismatch) / float(total)
 
     print("{:15s}: solution and reference similarity = {:.3f}%".format(testcase, similarity * 100))

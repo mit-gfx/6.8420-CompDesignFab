@@ -156,8 +156,8 @@ namespace mesh {
         }
 
         std::vector<Vector3<T>> _vertices;                      // list of vertices
-        std::vector<Eigen::Vector3i>   _elements;               // list of elements (triangles)
-        std::vector<Eigen::Vector3i> _edges;                    // list of triangle edges
+        std::vector<Eigen::Vector3i> _elements;                 // list of elements (triangles) - each element stores the indices of three vertices in a triangle
+        std::vector<Eigen::Vector3i> _edges;                    // list of triangle edges - each triplet stores the indices of three edges in a triangle (unrelated to vertex indices)
         std::vector<Vector3<T>> _normals;                       // list of normal for each triangle
         int _num_edges;                                         // number of different edges
     };

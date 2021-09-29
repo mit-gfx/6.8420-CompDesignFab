@@ -91,7 +91,7 @@ int main(int argc, char* argv[]) {
 std::string voxelize(std::string model, std::string dx, std::string alg = "basic") {
     int argc = alg.compare("basic") ? 4:3;
     char* argv[4];
-    argv[0] = "./assignment2/run2";
+    argv[0] = (char *)"./assignment2/run2";
     argv[1] = &model[0u];
     argv[2] = &dx[0u];
     argv[3] = &alg[0u];
@@ -108,7 +108,7 @@ std::string voxelize(std::string model, std::string dx, std::string alg = "basic
 std::string marching_cubes(std::string model) {
     int argc = 2;
     char* argv[2];
-    argv[0] = "./assignment2/run2";
+    argv[0] = (char *)"./assignment2/run2";
     argv[1] = &model[0u];
     int t0 = std::clock();
     main(argc, argv);
