@@ -57,8 +57,10 @@ int main(int argc, char** argv) {
     //             (you should also modify the constructor to initialize your tree)
     //     If contour creation is a bottleneck, accellerate it as well.
 
-    std::cout << "Slicing accelerated" << std::endl;
-	slice_to_gcode(model_file, gcode_file);
+	else {
+		std::cout << "Slicing accelerated" << std::endl;
+		slice_to_gcode(model_file, gcode_file);
+	}
 
     return 0;
 }
