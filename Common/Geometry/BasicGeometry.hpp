@@ -48,7 +48,7 @@ namespace geometry {
         Vector3<T>& vertices(int idx) { return _vertices[idx]; }
 
         
-        // TODO: HW1
+        // TODO: HW3
         // part 2.1
         // Implement the function to do intersection between triangle and plane p
         // Input: plane p
@@ -63,7 +63,7 @@ namespace geometry {
             return intersections;
         }
 
-        // TODO: HW2
+        // TODO: HW1
         // part 1.1
         // Implement the function to do intersection between triangle and a ray
         // Input: a ray, the ray is represented by an origin position and a direction vector
