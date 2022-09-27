@@ -76,6 +76,7 @@ void run_all() {
 }
 
 int main(int argc, char** argv) {
+	std::cerr << "Welcome to Assignment 2" << std::endl;
 	if (argc > 1 && std::string(argv[1]) == "test") {
 		run_all();
 	} else {
