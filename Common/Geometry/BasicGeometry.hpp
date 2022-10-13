@@ -47,19 +47,27 @@ namespace geometry {
         Vector3<T>* vertices() { return _vertices; }
         Vector3<T>& vertices(int idx) { return _vertices[idx]; }
 
-        
-        // TODO: HW3
-        // part 2.1
-        // Implement the function to do intersection between triangle and plane p
-        // Input: plane p
-        // Output: intersections points with three edges
-        // Hint:
-        //      - enumerate three edges of the triangle and do intersection individually
-        //      - consider the case that no intersection
-        //      - consider how to avoid repeated intersection points in returned list
-        std::vector<Vector3<T>> IntersectPlane(Plane<T> p) {
-            std::vector<Vector3<T>> intersections;
+        std::vector<std::pair<int, Vector3<T>>> IntersectPlane(Plane<T> p) {
+            std::vector<std::pair<int, Vector3<T>>> intersections;
             intersections.clear();
+            for (int i = 0;i < 3;++i) {
+                int id0 = i;
+                int id1 = (i + 1) % 3;
+                T dist0, dist1;
+                if (p.onPlane(_vertices[id0], dist0)) {
+                    intersections.push_back(std::make_pair(id0, _vertices[id0]));
+                } else if (p.onPlane(_vertices[id1], dist1)) {
+                    intersections.push_back(std::make_pair(-1, Vector3<T>::Zero()));
+                } else if (dist0 * dist1 < 0) {
+                    T factor = dist0 / (dist0 - dist1);
+                    Vector3<T> intersection = 
+                        _vertices[id0] + factor * (_vertices[id1] - _vertices[id0]);
+                    intersections.push_back(std::make_pair(3, intersection));
+                } else {
+                    intersections.push_back(std::make_pair(-1, Vector3<T>::Zero()));
+                }
+            }
+
             return intersections;
         }
 

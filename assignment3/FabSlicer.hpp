@@ -15,12 +15,20 @@ namespace fab_translation {
     template <typename T>
     class IntersectionEdge {
     public:
-        IntersectionEdge(Vector3<T> p0, Vector3<T> p1)
-            : _p0(p0), _p1(p1) {}
+        IntersectionEdge(int id0, int id1, Vector3<T> p0, Vector3<T> p1)
+            : _id0(id0), _id1(id1), _p0(p0), _p1(p1) {
+                if (_id0 > _id1) {
+                    std::swap(_id0, _id1);
+                    std::swap(_p0, _p1);
+                }
+            }
+        const int id0() const { return _id0; }
+        const int id1() const { return _id1; }
         Vector3<T> p0() { return _p0; }
         Vector3<T> p1() { return _p1; }
 
     private:
+        int _id0, _id1;
         Vector3<T> _p0, _p1;
     };
 
@@ -87,6 +95,31 @@ namespace fab_translation {
 			_dz = dz;
             _infill_dx = infill_dx;
 
+			T z_min = _bottom;
+			T z_max = _top;
+
+			int t1 = std::clock();
+            _interval_tree = data_structure::IntervalTree<T>(z_min - 0.1, z_max + 0.1);
+
+            std::vector<data_structure::IntervalEntry<T>> triangle_intervals;
+            triangle_intervals.clear();
+            for (int i = 0;i < _tri_mesh.elements().size();++i) {
+                Eigen::Vector3i& element = _tri_mesh.elements(i);
+                T l = _tri_mesh.vertices(element[0])[2];
+                T r = _tri_mesh.vertices(element[0])[2];
+                for (int j = 1;j < 3;++j) {
+                    l = std::min(l, _tri_mesh.vertices(element[j])[2]);
+                    r = std::max(r, _tri_mesh.vertices(element[j])[2]);
+                }
+                data_structure::IntervalEntry<T> interval(l - 1e-4, r + 1e-4, i);
+                triangle_intervals.push_back(interval);
+            }
+
+            _interval_tree.build(0,  _interval_tree.lower_bound(), _interval_tree.upper_bound(), triangle_intervals);
+			int t2 = std::clock();
+			printf("building interval tree success... %.6lf seconds\n", (double)(t2 - t1) / 1000000.0);
+            // ---------------------------------------------------------------------------------------------
+
             // compute infill x-y range
             _infill_x_lower_bound = 1000000.0; _infill_x_upper_bound = -1000000.0;
             _infill_y_lower_bound = 1000000.0; _infill_y_upper_bound = -1000000.0;
@@ -150,39 +183,114 @@ namespace fab_translation {
             VisualizeInfill(std::string(PROJECT_SOURCE_DIR) + "/data/assignment3/results/infill.ply", 0.5, infill_edges);
         }
 
-        // TODO: HW3
-        // Part 2.2: Brute Force Slicing
         // Input: 
         //      tri_mesh: the triangle mesh needed to be sliced
         // Output:
         //      intersection_edges: soup of intersection edges for each layer
-        // Hints:
-        //      - enumerate each plane
-        //          * slicing goes bottom-up in the Z direction
-        //          * use predefined variables in this class to calculate the slicing planes
-        //      - intersect it with every triangle, get an edge from each triangle (or not intersect at all)
-        //      - collect all intersection edges and return
         void Slicing_bruteforce(mesh::TriMesh<T>& tri_mesh, 
             std::vector<std::vector<IntersectionEdge<T>>> &intersection_edges) {
             
+            std::vector<Eigen::Vector3i>& elements = tri_mesh.elements();
+            std::vector<Vector3<T>>& vertices = tri_mesh.vertices();
+            std::vector<Eigen::Vector3i>& edges = tri_mesh.edges();
+
+            intersection_edges.clear();
+            for (T h = _bottom; h <= _top; h += _dz) {
+                std::vector<IntersectionEdge<T>> intersections_one_plane;
+                intersections_one_plane.clear();
+
+                geometry::Plane<T> plane(Vector3<T>(0, 0, h), Vector3<T>(0, 0, 1));
+                for (int i = 0;i < elements.size();++i) {
+                    geometry::Triangle<T> triangle(vertices[elements[i](0)], vertices[elements[i](1)], vertices[elements[i](2)]);
+                    std::vector<std::pair<int, Vector3<T>>> intersections = triangle.IntersectPlane(plane);
+                    int num_intersections = 0;
+                    for (int j = 0;j < 3;++j) {
+                        if ((intersections[j].first) != -1) {
+                            ++ num_intersections;
+                        }
+                    }
+                    if (num_intersections == 2) {
+                        int cnt = 0;
+                        int id[2];
+                        Vector3<T> p[2];
+                        for (int j = 0;j < 3;++j) {
+                            if (intersections[j].first != -1) {
+                                p[cnt] = intersections[j].second;
+                                if (intersections[j].first != 3) {
+                                    id[cnt] = elements[i][j];
+                                } else {
+                                    id[cnt] = vertices.size() + edges[i][j];
+                                }
+                                ++ cnt;
+                            }
+                        }
+                        assert(cnt == 2);
+                        intersections_one_plane.push_back(IntersectionEdge<T>(id[0], id[1], p[0], p[1]));
+                    }
+                }
+
+                intersection_edges.push_back(intersections_one_plane);
+            }
         }
 
-        // TODO: HW3
-        // Part 3.1: Accelerated Slicing - 6.839 only
         // Input: 
         //      tri_mesh: the triangle mesh needed to be sliced
         // Output:
         //      intersection_edges: soup of intersection edges for each layer
-        // Hints:
-        //      - similar code structure like Slicing_bruteforce
-        //      - for each plane, avoid enumerating all triangles to intersect (by interval tree, or other methods)
         void Slicing_accelerated(mesh::TriMesh<T>& tri_mesh,
             std::vector<std::vector<IntersectionEdge<T>>> &intersection_edges) {
+            
+            std::vector<Eigen::Vector3i>& elements = tri_mesh.elements();
+            std::vector<Vector3<T>>& vertices = tri_mesh.vertices();
+            std::vector<Eigen::Vector3i>& edges = tri_mesh.edges();
 
+            intersection_edges.clear();
+            for (T h = _bottom; h <= _top; h += _dz) {
+
+                std::vector<data_structure::IntervalEntry<T>> candidates;
+                _interval_tree.query(0, _interval_tree.lower_bound(), _interval_tree.upper_bound(), h, candidates);
+
+                std::vector<IntersectionEdge<T>> intersections_one_plane;
+                intersections_one_plane.clear();
+
+                geometry::Plane<T> plane(Vector3<T>(0, 0, h), Vector3<T>(0, 0, 1));
+
+                for (int i = 0;i < candidates.size();++i) {
+                    int ii = candidates[i].id;
+                    geometry::Triangle<T> triangle(vertices[elements[ii](0)], vertices[elements[ii](1)], vertices[elements[ii](2)]);
+                    std::vector<std::pair<int, Vector3<T>>> intersections = triangle.IntersectPlane(plane);
+                    int num_intersections = 0;
+                    for (int j = 0;j < 3;++j) {
+                        if ((intersections[j].first) != -1) {
+                            ++ num_intersections;
+                        }
+                    }
+                    if (num_intersections == 2) {
+                        int cnt = 0;
+                        int id[2];
+                        Vector3<T> p[2];
+                        for (int j = 0;j < 3;++j) {
+                            if (intersections[j].first != -1) {
+                                p[cnt] = intersections[j].second;
+                                if (intersections[j].first != 3) {
+                                    id[cnt] = elements[ii][j];
+                                } else {
+                                    id[cnt] = vertices.size() + edges[ii][j];
+                                }
+                                ++ cnt;
+                            }
+                        }
+                        assert(cnt == 2);
+                        intersections_one_plane.push_back(IntersectionEdge<T>(id[0], id[1], p[0], p[1]));    
+                    }
+                }
+
+                intersection_edges.push_back(intersections_one_plane);
+            }
         }
 
         // TODO: HW3
-        // part 2.3, 3.2
+        // part 2.1, 5.1
         // Input:
         //      tri_mesh: the triangle mesh needed to be sliced
         //      intersection_edges: the intersection edge soup, which is the output from slicing_bruteforce/slicing_accelerated
@@ -200,7 +308,8 @@ namespace fab_translation {
 
         }
 
-        // TODO: HW3 (Optional)
+        // TODO: HW3
+        // part 4.1
         // Make infill pattern in each layer.
         // Input:
         //      contours: the contours in each layer, which is generated from CreateContour function
